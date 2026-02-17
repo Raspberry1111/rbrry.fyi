@@ -18,7 +18,6 @@
 	let discordURLInput = $state("");
 	let tagsInput = $state("");
 	let videoContainer: HTMLElement;
-	let observer: ResizeObserver;
 
 	let searchTags = $derived(
 		searchInput
@@ -28,13 +27,15 @@
 	);
 
 	let gifs = $derived(
-		$gifsStore.filter((gif) =>
-			searchTags.every((tag) =>
-				gif.tags.some((gifTag) =>
-					gifTag.toLowerCase().includes(tag.toLowerCase()),
+		$gifsStore
+			.filter((gif) =>
+				searchTags.every((tag) =>
+					gif.tags.some((gifTag) =>
+						gifTag.toLowerCase().includes(tag.toLowerCase()),
+					),
 				),
-			),
-		),
+			)
+			.map((gif, index) => ({ ...gif, id: index })),
 	);
 
 	function onAddButtonClick() {
@@ -123,50 +124,7 @@
 		fileInput.click();
 	}
 
-	// function resizeMasonryItem(container: HTMLElement) {
-	// 	console.log("Resizing item:", container);
-	// 	const styles = window.getComputedStyle(videoContainer);
-	// 	const rowHeight = parseInt(styles.getPropertyValue("grid-auto-rows"));
-	// 	const rowGap = parseInt(styles.getPropertyValue("gap"));
-
-	// 	const video = container.querySelector("video");
-	// 	if (!video) return;
-
-	// 	const videoHeight = video.offsetHeight;
-	// 	const tagsHeight = container.querySelector("p")
-	// 		? (container.querySelector("p") as HTMLElement).offsetHeight
-	// 		: 0;
-
-	// 	const buttonsHeight = container.querySelector(".button-wrapper")
-	// 		? (container.querySelector(".button-wrapper") as HTMLElement)
-	// 				.offsetHeight
-	// 		: 0;
-
-	// 	const totalHeight = videoHeight + tagsHeight + buttonsHeight + 10;
-
-	// 	const rowSpan = Math.ceil(
-	// 		(totalHeight + rowGap) / (rowHeight + rowGap),
-	// 	);
-
-	// 	container.style.gridRowEnd = `span ${rowSpan}`;
-	// }
-
-	// function masonry(node: HTMLElement) {
-	// 	observer.observe(node);
-	// 	return {
-	// 		destroy() {
-	// 			observer.unobserve(node);
-	// 		},
-	// 	};
-	// }
-
 	onMount(() => {
-		// observer = new ResizeObserver((entries) => {
-		// 	for (const entry of entries) {
-		// 		resizeMasonryItem(entry.target as HTMLElement);
-		// 	}
-		// });
-
 		const storedGifs = localStorage.getItem("gifs");
 		if (storedGifs) {
 			gifsStore.set(JSON.parse(storedGifs));
@@ -175,10 +133,6 @@
 		gifsStore.subscribe((value) => {
 			localStorage.setItem("gifs", JSON.stringify(value));
 		});
-
-		// return () => {
-		// 	observer.disconnect();
-		// };
 	});
 </script>
 
@@ -226,15 +180,23 @@
 	</div>
 </div>
 
-<div id="video-container" bind:this={videoContainer}>
+<div id="video-container">
 	<Masonry
 		items={gifs}
-		getId={(gif) => gif.url}
+		idKey="id"
 		gap={12}
 		id="video-container"
 		animate={false}
 		minColWidth={200}
 		maxColWidth={1000}
+		order="column-balanced"
+		calcCols={(masonryWidth, minColWidth, gap) => {
+			return Math.min(
+				gifs.length,
+				5,
+				Math.floor((masonryWidth + gap) / (minColWidth + gap)) || 1,
+			);
+		}}
 	>
 		{#snippet children({ item: gif, idx: index })}
 			<div class="gif-container">
@@ -247,7 +209,6 @@
 						disablepictureinpicture
 						onmouseenter={(e) => e.currentTarget.play()}
 						onmouseleave={(e) => e.currentTarget.pause()}
-						
 					>
 						<source src={gif.url} type="video/mp4" />
 					</video>
