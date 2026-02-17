@@ -1,7 +1,20 @@
 <script lang="ts">
 	import { resolve } from "$app/paths";
+	import Topbar from "$lib/topbar.svelte";
 </script>
 
-<h1>sveltekit-gh-pages</h1>
-<p>Deployed to GitHub Pages.</p>
-<a href={resolve("/gif/")}>Gif</a>
+<Topbar />
+
+<div>
+	<h1>home</h1>
+	<p>Very cool home page</p>
+</div>
+
+<style lang="scss">
+	h1 {
+		text-align: center;
+	}
+	div {
+		padding: 1rem;
+	}
+</style>

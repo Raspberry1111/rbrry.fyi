@@ -1,0 +1,15 @@
+@use "variables.scss" as *;
+
+body {
+	font: 100% $font-stack;
+	color: $primary-color;
+	background-color: $background-color;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+
