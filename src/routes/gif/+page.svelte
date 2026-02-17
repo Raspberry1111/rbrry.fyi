@@ -189,11 +189,11 @@
 		animate={false}
 		minColWidth={200}
 		maxColWidth={1000}
-		order="column-balanced"
+		order="row-first"
 		calcCols={(masonryWidth, minColWidth, gap) => {
 			return Math.min(
 				gifs.length,
-				5,
+				6,
 				Math.floor((masonryWidth + gap) / (minColWidth + gap)) || 1,
 			);
 		}}
