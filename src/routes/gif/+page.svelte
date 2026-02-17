@@ -12,9 +12,9 @@
 	const gifsStore = writable<Gif[]>([]);
 
 	let searchInput = $state("");
-	let urlInput = "";
-	let discordURLInput = "";
-	let tagsInput = "";
+	let urlInput = $state("");
+	let discordURLInput = $state("");
+	let tagsInput = $state("");
 	let videoContainer: HTMLElement;
 	let observer: ResizeObserver;
 
@@ -34,96 +34,6 @@
 			),
 		),
 	);
-
-	// function reloadGifs(gifs, tags) {
-	// 	videoContainer.innerHTML = ""; // clear previous content
-	// 	gifsStore.forEach((gif, i) => {
-	// 		if (
-	// 			tags.length > 0 &&
-	// 			!tags.every((searchTag) =>
-	// 				gif.tags.some((gifTag) =>
-	// 					gifTag.toLowerCase().includes(searchTag.toLowerCase()),
-	// 				),
-	// 			)
-	// 		)
-	// 			return;
-
-	// 		const container = document.createElement("div");
-	// 		container.classList.add("gif-container");
-	// 		container.dataset.id = i.toString();
-	// 		container.dataset.discordUrl = gif.discordUrl || gif.url;
-	// 		container.dataset.url = gif.url;
-
-	// 		// Video element
-	// 		const video = document.createElement("video");
-	// 		video.classList.add("gif-video");
-	// 		video.loop = true;
-	// 		video.muted = true;
-	// 		video.playsInline = true;
-	// 		video.disablePictureInPicture = true;
-	// 		video.addEventListener("mouseenter", () => video.play());
-	// 		video.addEventListener("mouseleave", () => video.pause());
-
-	// 		const source = document.createElement("source");
-	// 		source.src = gif.url;
-	// 		source.type = "video/mp4";
-	// 		video.appendChild(source);
-
-	// 		// Close button
-	// 		const closeButton = document.createElement("button");
-	// 		closeButton.classList.add("close-button");
-	// 		closeButton.textContent = "X";
-	// 		closeButton.addEventListener("click", () => {
-	// 			if (
-	// 				!confirm(
-	// 					`Delete this GIF?\nURL: ${gif.url}\nDiscord URL: ${container.dataset.discordUrl}\nTags: ${gif.tags.join(", ")}`,
-	// 				)
-	// 			)
-	// 				return;
-	// 			gifs.splice(container.dataset.id, 1);
-	// 			localStorage.setItem("gifs", JSON.stringify(gifs));
-	// 			reloadGifs();
-	// 		});
-
-	// 		// Tags
-	// 		const tagsText = document.createElement("p");
-	// 		tagsText.textContent = "Tags: " + gif.tags.join(", ");
-
-	// 		// Copy buttons
-	// 		const copyDiscordButton = document.createElement("button");
-	// 		copyDiscordButton.classList.add("copy-discord-button");
-	// 		copyDiscordButton.textContent = "Copy Discord URL";
-	// 		copyDiscordButton.addEventListener("click", () => {
-	// 			navigator.clipboard
-	// 				.writeText(container.dataset.discordUrl)
-	// 				.then(() => alert("Discord URL copied!"))
-	// 				.catch((err) => alert("Failed to copy: " + err));
-	// 		});
-
-	// 		const copyUrlButton = document.createElement("button");
-	// 		copyUrlButton.classList.add("copy-button");
-	// 		copyUrlButton.textContent = "Copy URL";
-	// 		copyUrlButton.addEventListener("click", () => {
-	// 			navigator.clipboard
-	// 				.writeText(container.dataset.url)
-	// 				.then(() => alert("URL copied!"))
-	// 				.catch((err) => alert("Failed to copy: " + err));
-	// 		});
-
-	// 		// Button wrapper
-	// 		const buttonWrapper = document.createElement("div");
-	// 		buttonWrapper.classList.add("button-wrapper");
-	// 		buttonWrapper.appendChild(copyDiscordButton);
-	// 		buttonWrapper.appendChild(copyUrlButton);
-	// 		buttonWrapper.appendChild(closeButton);
-
-	// 		// Append all elements
-	// 		container.appendChild(video);
-	// 		container.appendChild(tagsText);
-	// 		container.appendChild(buttonWrapper);
-	// 		videoContainer.appendChild(container);
-
-	// 		// Masonry row span calculation
 
 	function onAddButtonClick() {
 		if (urlInput.trim() === "" || tagsInput.trim() === "") {
@@ -510,7 +420,6 @@
 	.button-wrapper button.copy-button:hover {
 		background-color: rgba(67, 181, 129, 0.6);
 	}
-	
 
 	/* Button hover effect: grows by changing padding/font-size */
 	.button-wrapper button:hover {
