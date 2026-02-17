@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Topbar from "$lib/topbar.svelte";
+	import Masonry from "svelte-bricks";
+
 	import { onMount } from "svelte";
 	import { writable } from "svelte/store";
 
@@ -121,48 +123,49 @@
 		fileInput.click();
 	}
 
-	function resizeMasonryItem(container: HTMLElement) {
-		const styles = window.getComputedStyle(videoContainer);
-		const rowHeight = parseInt(styles.getPropertyValue("grid-auto-rows"));
-		const rowGap = parseInt(styles.getPropertyValue("gap"));
+	// function resizeMasonryItem(container: HTMLElement) {
+	// 	console.log("Resizing item:", container);
+	// 	const styles = window.getComputedStyle(videoContainer);
+	// 	const rowHeight = parseInt(styles.getPropertyValue("grid-auto-rows"));
+	// 	const rowGap = parseInt(styles.getPropertyValue("gap"));
 
-		const video = container.querySelector("video");
-		if (!video) return;
+	// 	const video = container.querySelector("video");
+	// 	if (!video) return;
 
-		const videoHeight = video.offsetHeight;
-		const tagsHeight = container.querySelector("p")
-			? (container.querySelector("p") as HTMLElement).offsetHeight
-			: 0;
+	// 	const videoHeight = video.offsetHeight;
+	// 	const tagsHeight = container.querySelector("p")
+	// 		? (container.querySelector("p") as HTMLElement).offsetHeight
+	// 		: 0;
 
-		const buttonsHeight = container.querySelector(".button-wrapper")
-			? (container.querySelector(".button-wrapper") as HTMLElement)
-					.offsetHeight
-			: 0;
+	// 	const buttonsHeight = container.querySelector(".button-wrapper")
+	// 		? (container.querySelector(".button-wrapper") as HTMLElement)
+	// 				.offsetHeight
+	// 		: 0;
 
-		const totalHeight = videoHeight + tagsHeight + buttonsHeight + 10;
+	// 	const totalHeight = videoHeight + tagsHeight + buttonsHeight + 10;
 
-		const rowSpan = Math.ceil(
-			(totalHeight + rowGap) / (rowHeight + rowGap),
-		);
+	// 	const rowSpan = Math.ceil(
+	// 		(totalHeight + rowGap) / (rowHeight + rowGap),
+	// 	);
 
-		container.style.gridRowEnd = `span ${rowSpan}`;
-	}
+	// 	container.style.gridRowEnd = `span ${rowSpan}`;
+	// }
 
-	function masonry(node: HTMLElement) {
-		observer.observe(node);
-		return {
-			destroy() {
-				observer.unobserve(node);
-			},
-		};
-	}
+	// function masonry(node: HTMLElement) {
+	// 	observer.observe(node);
+	// 	return {
+	// 		destroy() {
+	// 			observer.unobserve(node);
+	// 		},
+	// 	};
+	// }
 
 	onMount(() => {
-		observer = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				resizeMasonryItem(entry.target as HTMLElement);
-			}
-		});
+		// observer = new ResizeObserver((entries) => {
+		// 	for (const entry of entries) {
+		// 		resizeMasonryItem(entry.target as HTMLElement);
+		// 	}
+		// });
 
 		const storedGifs = localStorage.getItem("gifs");
 		if (storedGifs) {
@@ -173,9 +176,9 @@
 			localStorage.setItem("gifs", JSON.stringify(value));
 		});
 
-		return () => {
-			observer.disconnect();
-		};
+		// return () => {
+		// 	observer.disconnect();
+		// };
 	});
 </script>
 
@@ -224,286 +227,257 @@
 </div>
 
 <div id="video-container" bind:this={videoContainer}>
-	{#each gifs as gif, index}
-		<div class="gif-container">
-			{#key gif.url}
-				<video
-					class="gif-video"
-					loop
-					muted
-					playsinline
-					disablepictureinpicture
-					onmouseenter={(e) => e.currentTarget.play()}
-					onmouseleave={(e) => e.currentTarget.pause()}
-					onloadedmetadata={(e) => {
-						resizeMasonryItem(
-							e.currentTarget.parentElement as HTMLElement,
-						);
-					}}
-					use:masonry
-				>
-					<source src={gif.url} type="video/mp4" />
-				</video>
-			{/key}
-			<p>Tags: {gif.tags.join(", ")}</p>
-			<div class="button-wrapper">
-				<button
-					class="copy-discord-button"
-					onclick={() => {
-						navigator.clipboard
-							.writeText(gif.discordUrl || gif.url)
-							.then(() => alert("Discord URL copied!"))
-							.catch((err) => alert("Failed to copy: " + err));
-					}}
-				>
-					Copy Discord URL
-				</button>
-				<button
-					class="copy-button"
-					onclick={() => {
-						navigator.clipboard
-							.writeText(gif.url)
-							.then(() => alert("URL copied!"))
-							.catch((err) => alert("Failed to copy: " + err));
-					}}
-				>
-					Copy URL
-				</button>
-				<button
-					class="close-button"
-					onclick={() => {
-						if (
-							!confirm(
-								`Delete this GIF?\nURL: ${gif.url}\nDiscord URL: ${gif.discordUrl}\nTags: ${gif.tags.join(", ")}`,
+	<Masonry
+		items={gifs}
+		getId={(gif) => gif.url}
+		gap={12}
+		id="video-container"
+		animate={false}
+		minColWidth={200}
+		maxColWidth={1000}
+	>
+		{#snippet children({ item: gif, idx: index })}
+			<div class="gif-container">
+				{#key gif.url}
+					<video
+						class="gif-video"
+						loop
+						muted
+						playsinline
+						disablepictureinpicture
+						onmouseenter={(e) => e.currentTarget.play()}
+						onmouseleave={(e) => e.currentTarget.pause()}
+						
+					>
+						<source src={gif.url} type="video/mp4" />
+					</video>
+				{/key}
+				<p>Tags: {gif.tags.join(", ")}</p>
+				<div class="button-wrapper">
+					<button
+						class="copy-discord-button"
+						onclick={() => {
+							navigator.clipboard
+								.writeText(gif.discordUrl || gif.url)
+								.then(() => alert("Discord URL copied!"))
+								.catch((err) =>
+									alert("Failed to copy: " + err),
+								);
+						}}
+					>
+						Copy Discord URL
+					</button>
+					<button
+						class="copy-button"
+						onclick={() => {
+							navigator.clipboard
+								.writeText(gif.url)
+								.then(() => alert("URL copied!"))
+								.catch((err) =>
+									alert("Failed to copy: " + err),
+								);
+						}}
+					>
+						Copy URL
+					</button>
+					<button
+						class="close-button"
+						onclick={() => {
+							if (
+								!confirm(
+									`Delete this GIF?\nURL: ${gif.url}\nDiscord URL: ${gif.discordUrl}\nTags: ${gif.tags.join(", ")}`,
+								)
 							)
-						)
-							return;
-						gifsStore.update((currentGifs) =>
-							currentGifs.filter((_, i) => i !== index),
-						);
-					}}
-				>
-					X
-				</button>
+								return;
+							gifsStore.update((currentGifs) =>
+								currentGifs.filter((_, i) => i !== index),
+							);
+						}}
+					>
+						X
+					</button>
+				</div>
 			</div>
-		</div>
-	{/each}
+		{/snippet}
+	</Masonry>
 </div>
 
 <style lang="scss">
-	/* Center the controls */
+	$secondary-color: #f5f5f5;
+	$accent-color: #ff6b6b;
+	$text-color: #333;
+	$border-radius: 6px;
+	$gap: 12px;
+	$button-padding: 12px 24px;
+	$gif-button-padding: 6px 12px;
+
+	$shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	$grid-row-gap: 10px;
+
+	$copy-button-color: #4caf50;
+	$discord-button-color: #7289da;
+	$close-button-color: #e74c3c;
+	$data-button-color: #5c76d2;
+	$add-button-color: $data-button-color;
+
 	#controls {
+		max-width: 800px;
+		justify-self: center;
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		margin: 20px 0;
-		gap: 15px;
+		gap: $gap;
+		padding: $gap;
+
+		#data-button-container {
+			justify-content: center;
+			display: flex;
+			gap: $gap;
+
+			button {
+				padding: $button-padding;
+				border-radius: $border-radius;
+				border: none;
+				background-color: $data-button-color;
+				color: white;
+				cursor: pointer;
+				font-weight: 500;
+				transition: background 0.2s;
+
+				&:hover {
+					background-color: darken($data-button-color, 10%);
+				}
+			}
+		}
+
+		#search {
+			input {
+				width: 100%;
+				padding: $button-padding;
+				border-radius: $border-radius;
+				border: 1px solid lighten($text-color, 50%);
+				font-size: 1rem;
+				&:focus {
+					outline: none;
+					border-color: $primary-color;
+					box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+				}
+			}
+		}
+
+		#add {
+			display: flex;
+			flex-wrap: wrap;
+			gap: $gap;
+
+			input {
+				flex: 1 1 50px;
+				padding: $button-padding / 1.5;
+				border-radius: $border-radius;
+				border: 1px solid lighten($text-color, 50%);
+				font-size: 1rem;
+				text-align: center;
+			}
+
+			#add-button {
+				padding: $button-padding;
+				background-color: $add-button-color;
+				color: $primary-color;
+				font-weight: 500;
+				border-radius: $border-radius;
+				border: none;
+				cursor: pointer;
+				transition: background 0.2s;
+
+				&:hover {
+					background-color: darken($accent-color, 10%);
+				}
+			}
+		}
 	}
 
-	/* Make input sections inline on wide screens */
-	#search,
-	#add {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px;
-		justify-content: center;
-		width: 100%;
-		max-width: 700px;
-	}
-
-	#controls input {
-		padding: 8px 10px;
-		border-radius: 5px;
-		border: 1px solid #ccc;
-		font-size: 14px;
-		flex: 1 1 120px;
-		min-width: 100px;
-	}
-
-	/* Buttons inside controls */
-	#controls button {
-		padding: 8px 14px;
-		border-radius: 5px;
-		border: none;
-		background-color: #5865f2;
-		color: white;
-		cursor: pointer;
-		font-size: 14px;
-		flex: 0 0 auto;
-		transition:
-			padding 0.2s ease,
-			font-size 0.2s ease,
-			background-color 0.2s ease;
-	}
-
-	#controls button:hover {
-		background-color: #4752c4;
-	}
-
-	/* GIF grid */
 	#video-container {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		grid-auto-rows: 10px; /* small base row height for masonry */
-		gap: 15px;
-		padding: 20px;
-		max-width: 1600px;
-		margin: 0 auto;
-	}
+		padding: $gap;
 
-	/* GIF container */
-	.gif-container {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		background: $topbar-background-color;
-		border-radius: 8px;
-		overflow: hidden;
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-		transition: box-shadow 0.2s ease;
-	}
+		.gif-container {
+			background: $topbar-background-color;
+			border-radius: $border-radius;
+			box-shadow: $shadow;
+			display: grid;
+			grid-auto-rows: auto auto auto; // small row height for masonry
+			flex-direction: column;
+			position: relative;
+			height: 100%;
+			justify-content: center;
 
-	.gif-container:hover {
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* subtle "grow" effect via shadow */
-	}
+			video {
+				width: 100%;
+				cursor: pointer;
+				border-radius: $border-radius $border-radius 0 0;
+			}
 
-	/* Videos */
-	.gif-video {
-		width: 100%;
-		height: auto;
-		display: block;
-		border-radius: 5px;
-	}
+			p {
+				padding: $gap / 2;
+				margin: 0;
+				font-size: 0.85rem;
+				color: $primary-color;
+			}
 
-	/* Button wrapper */
-	.button-wrapper {
-		position: static;
-		display: flex;
-		gap: 5px;
-		margin-top: 5px;
-		justify-content: center;
-		pointer-events: auto;
-		padding: 5px;
-		transition: all 0.2s ease;
-	}
+			.button-wrapper {
+				margin-top: auto;
+				display: flex;
+				justify-content: center;
+				gap: $gap / 2;
+				padding: $gap / 2;
+				flex-wrap: wrap;
 
-	/* Buttons inside wrapper */
-	.button-wrapper button {
-		padding: 4px 8px;
-		font-size: 12px;
-		border-radius: 5px;
-		border: none;
-		cursor: pointer;
-		color: white;
-		opacity: 1;
-		transition:
-			padding 0.2s ease,
-			font-size 0.2s ease,
-			opacity 0.2s ease,
-			background-color 0.2s ease;
-	}
+				button {
+					padding: $gif-button-padding;
+					border-radius: $border-radius;
+					border: none;
+					cursor: pointer;
+					font-size: 0.8rem;
+					font-weight: 500;
+					transition: background 0.2s;
 
-	/* Discord copy button */
-	.button-wrapper button.copy-discord-button {
-		background-color: rgba(45, 129, 232, 0.9);
-	}
+					&.copy-button {
+						background: $copy-button-color;
+						color: $primary-color;
 
-	.button-wrapper button.copy-discord-button:hover {
-		background-color: rgba(45, 129, 232, 0.6);
-	}
+						&:hover {
+							background: darken($copy-button-color, 10%);
+						}
+					}
 
-	.button-wrapper button.copy-button {
-		background-color: rgba(67, 181, 129, 0.9);
-	}
+					&.copy-discord-button {
+						background: $discord-button-color;
+						color: $primary-color;
 
-	.button-wrapper button.copy-button:hover {
-		background-color: rgba(67, 181, 129, 0.6);
-	}
+						&:hover {
+							background: darken($discord-button-color, 10%);
+						}
+					}
 
-	/* Button hover effect: grows by changing padding/font-size */
-	.button-wrapper button:hover {
-		opacity: 1;
-	}
+					&.close-button {
+						background: $close-button-color;
+						color: $primary-color;
 
-	/* Close button */
-	.button-wrapper .close-button {
-		background-color: rgba(255, 0, 0, 0.8);
-		color: white;
-		width: auto;
-		height: auto;
-		padding: 4px 8px;
-		border-radius: 5px;
-		font-weight: normal;
-		line-height: normal;
-		cursor: pointer;
-		border: none;
-		transition:
-			padding 0.2s ease,
-			font-size 0.2s ease,
-			background-color 0.2s ease;
-	}
-
-	.close-button:hover {
-		background-color: rgba(255, 0, 0, 0.6);
-	}
-
-	/* Tags text */
-	.gif-container p {
-		margin: 5px 0 5px 0;
-		font-size: 12px;
-		color: white;
-		text-align: center;
-	}
-
-	/* Responsive adjustments */
-	@media (max-width: 500px) {
-		#controls input {
-			flex: 1 1 100%;
-		}
-
-		#controls button {
-			flex: 1 1 100%;
-		}
-
-		.button-wrapper {
-			right: 35px;
+						&:hover {
+							background: darken($close-button-color, 10%);
+						}
+					}
+				}
+			}
 		}
 	}
 
-	/* Data button container */
-	#data-button-container {
-		display: flex;
-		width: 100%;
-		margin-left: 35px;
-		justify-content: flex-start;
-		gap: 0.5rem;
+	// ----------------------
+	// Utility
+	// ----------------------
+	button:focus {
+		outline: none;
 	}
 
-	#export-button,
-	#import-button {
-		padding: 4px 8px;
-		font-size: 12px;
-		border-radius: 5px;
-		border: none;
-		cursor: pointer;
-		color: white;
-		opacity: 1;
-		transition:
-			padding 0.2s ease,
-			font-size 0.2s ease,
-			opacity 0.2s ease;
-		z-index: 100;
-	}
-
-	#export-button {
-		margin-right: 1rem;
-	}
-
-	@media (min-width: 1200px) {
-		#video-container {
-			grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-			max-width: 1600px;
-		}
+	input:focus {
+		outline: none;
 	}
 </style>
