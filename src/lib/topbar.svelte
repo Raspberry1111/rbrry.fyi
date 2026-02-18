@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { resolve } from "$app/paths";
 	import { page } from "$app/state";
+
+	let { onHiddenClicked = () => {} } = $props();
 </script>
 
 <div class="topbar">
@@ -11,6 +13,12 @@
 	<a
 		href={resolve("/gif")}
 		aria-current={page.url.pathname === "/gif/" ? "page" : undefined}>gif</a
+	>
+	<a
+		href={resolve("/hidden/")}
+		aria-current={page.url.pathname === "/hidden/" ? "page" : undefined}
+		onclick={() => onHiddenClicked()}
+		class="hidden">hidden</a
 	>
 </div>
 
@@ -38,6 +46,20 @@
 
 	a[aria-current="page"] {
 		color: $active-page-link;
+	}
+
+	a.hidden {
+		color: $topbar-background-color;
+		margin-left: auto;
+	}
+
+	a.hidden[aria-current="page"] {
+		color: $active-page-link;
+	}
+
+	a.hidden:hover,
+	a.hidden:focus {
+		scale: 1;
 	}
 
 	.topbar {
