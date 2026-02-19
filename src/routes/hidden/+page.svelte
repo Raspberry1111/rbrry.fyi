@@ -1,11 +1,8 @@
 <script lang="ts">
 	import Topbar from "$lib/topbar.svelte";
 	import { onMount } from "svelte";
-	import { page } from "$app/state";
 
-	const ITEM_HEIGHT = 50;
-	const TOTAL_ITEMS = 200;
-	const FAKE_TOTAL = 1000000000; // very large height
+	const FAKE_TOTAL = 100_000; // very large height
 
 	let altMode = $state(false);
 	let names = $derived(
@@ -14,32 +11,14 @@
 			: ["sucks", "is a bum", "is not cool", "exists"],
 	);
 
-	let scrollTop = $state(0);
-	let viewportHeight = $state(0);
-	let container: HTMLDivElement;
-
-	let startIndex = $derived(Math.floor(scrollTop / ITEM_HEIGHT));
-	let visibleCount = $derived(Math.ceil(viewportHeight / ITEM_HEIGHT) + 5);
-	let visibleItems = $derived(
-		Array.from({ length: Math.min(visibleCount, 100) }, (_, i) => {
-			return {
-				index:
-					((startIndex + i) % TOTAL_ITEMS) +
-					Math.floor(Math.random() * 4),
-				absIndex: startIndex + i,
-			};
-		}),
-	);
+	const JUMP_POINT = 10000;
+	const TARGET = 1000;
 
 	onMount(() => {
-		viewportHeight = window.innerHeight;
-
 		window.addEventListener("scroll", () => {
-			scrollTop = window.scrollY;
-		});
-
-		window.addEventListener("resize", () => {
-			viewportHeight = window.innerHeight;
+			if (window.scrollY > JUMP_POINT) {
+				window.scrollTo(0, TARGET);
+			}
 		});
 	});
 </script>
@@ -50,20 +29,13 @@
 	}}
 />
 
-<div
-	bind:this={container}
-	onscroll={(e) => (scrollTop = e.currentTarget.scrollTop)}
-	style="height: {FAKE_TOTAL}px; position: relative;"
->
-	{#each visibleItems as i}
+<div style="height: {FAKE_TOTAL}px;">
+	{#each Array(1000) as _, i}
 		<h1
-			class="rainbow infinite-scroll"
-			style="top: {i.absIndex * ITEM_HEIGHT}px; height: {ITEM_HEIGHT}px;
-				animation-delay: {Math.random() * 0.5}s;
-
-				"
+			class="rainbow"
+			style="animation-delay: {Math.random() * 0.5}s;"
 		>
-			nic chose {names[i.index % 4]}
+			nic chose {names[i % 4]}
 		</h1>
 	{/each}
 </div>
@@ -76,23 +48,12 @@
 		padding: 1rem;
 	}
 
-	.container {
-		height: 400vh;
-	}
-
-	.infinite-scroll {
-		position: absolute;
-		width: 100%;
-		left: 0;
-		right: 0;
-	}
-
 	.rainbow {
 		background: linear-gradient(
 			90deg,
 			red,
 			yellow,
-			green,
+			rgb(124, 249, 124),
 			cyan,
 			blue,
 			magenta
