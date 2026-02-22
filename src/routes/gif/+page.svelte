@@ -11,6 +11,8 @@
 		discordUrl?: string;
 	};
 
+	const videoTags = new Set(["mp4", "webm", "ogg", "ogv"]);
+
 	const gifsStore = writable<Gif[]>([]);
 
 	let searchInput = $state("");
@@ -201,17 +203,24 @@
 		{#snippet children({ item: gif, idx: index })}
 			<div class="gif-container">
 				{#key gif.url}
-					<video
-						class="gif-video"
-						loop
-						muted
-						playsinline
-						disablepictureinpicture
-						onmouseenter={(e) => e.currentTarget.play()}
-						onmouseleave={(e) => e.currentTarget.pause()}
-					>
-						<source src={gif.url} />
-					</video>
+					{#if videoTags.has(gif.url
+							.split(".")
+							.slice(-1)[0]
+							.toLowerCase())}
+						<video
+							class="gif-video"
+							loop
+							muted
+							playsinline
+							disablepictureinpicture
+							onmouseenter={(e) => e.currentTarget.play()}
+							onmouseleave={(e) => e.currentTarget.pause()}
+						>
+							<source src={gif.url} />
+						</video>
+					{:else}
+						<img src={gif.url} alt={gif.url} class="gif-video" />
+					{/if}
 				{/key}
 				<p>Tags: {gif.tags.join(", ")}</p>
 				<div class="button-wrapper">
@@ -281,6 +290,12 @@
 	$data-button-color: #5c76d2;
 	$add-button-color: $data-button-color;
 
+	img {
+		width: 100%;
+		height: auto;
+		display: block;
+	}
+	
 	#controls {
 		max-width: 800px;
 		justify-self: center;
