@@ -210,7 +210,7 @@
 						onmouseenter={(e) => e.currentTarget.play()}
 						onmouseleave={(e) => e.currentTarget.pause()}
 					>
-						<source src={gif.url} type="video/mp4" />
+						<source src={gif.url} />
 					</video>
 				{/key}
 				<p>Tags: {gif.tags.join(", ")}</p>
