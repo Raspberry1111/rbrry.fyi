@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Topbar from "$lib/topbar.svelte";
+
 	import Masonry from "svelte-bricks";
 
 	import { onMount } from "svelte";
@@ -11,15 +12,16 @@
 		discordUrl?: string;
 	};
 
-	const videoTags = new Set(["mp4", "webm", "ogg", "ogv"]);
-
 	const gifsStore = writable<Gif[]>([]);
 
 	let searchInput = $state("");
 	let urlInput = $state("");
 	let discordURLInput = $state("");
 	let tagsInput = $state("");
-	let videoContainer: HTMLElement;
+
+	// validation flags for inline errors
+	let urlError = $state(false);
+	let tagsError = $state(false);
 
 	let searchTags = $derived(
 		searchInput
@@ -41,8 +43,11 @@
 	);
 
 	function onAddButtonClick() {
-		if (urlInput.trim() === "" || tagsInput.trim() === "") {
-			alert("Please enter both URL and tags.");
+		// set validation flags instead of showing an alert
+		urlError = urlInput.trim() === "";
+		tagsError = tagsInput.trim() === "";
+
+		if (urlError || tagsError) {
 			return;
 		}
 
@@ -70,6 +75,10 @@
 		urlInput = "";
 		tagsInput = "";
 		discordURLInput = "";
+
+		// clear validation after successful add
+		urlError = false;
+		tagsError = false;
 	}
 
 	function onExportButtonClicked() {
@@ -126,6 +135,13 @@
 		fileInput.click();
 	}
 
+	function isVideo(url: string) {
+		const extension = url.split(".").pop()?.toLowerCase();
+		return extension
+			? ["mp4", "webm", "ogg", "ogv"].includes(extension)
+			: false;
+	}
+
 	onMount(() => {
 		const storedGifs = localStorage.getItem("gifs");
 		if (storedGifs) {
@@ -164,6 +180,7 @@
 			placeholder="URL"
 			id="add-input"
 			bind:value={urlInput}
+			class:error={urlError && urlInput.trim() === ""}
 		/>
 		<input
 			type="text"
@@ -176,6 +193,7 @@
 			placeholder="Tags (space separated)"
 			id="add-tags-input"
 			bind:value={tagsInput}
+			class:error={tagsError && tagsInput.trim() === ""}
 		/>
 
 		<button id="add-button" onclick={onAddButtonClick}>Add</button>
@@ -203,10 +221,7 @@
 		{#snippet children({ item: gif, idx: index })}
 			<div class="gif-container">
 				{#key gif.url}
-					{#if videoTags.has(gif.url
-							.split(".")
-							.slice(-1)[0]
-							.toLowerCase())}
+					{#if isVideo(gif.url)}
 						<video
 							class="gif-video"
 							loop
@@ -273,6 +288,9 @@
 </div>
 
 <style lang="scss">
+	@use "sass:math";
+	@use "sass:color";
+
 	$secondary-color: #f5f5f5;
 	$accent-color: #ff6b6b;
 	$text-color: #333;
@@ -290,12 +308,6 @@
 	$data-button-color: #5c76d2;
 	$add-button-color: $data-button-color;
 
-	img {
-		width: 100%;
-		height: auto;
-		display: block;
-	}
-	
 	#controls {
 		max-width: 800px;
 		justify-self: center;
@@ -320,7 +332,11 @@
 				transition: background 0.2s;
 
 				&:hover {
-					background-color: darken($data-button-color, 10%);
+					background-color: color.adjust(
+						$data-button-color,
+						$lightness: -10%,
+						$space: hsl
+					);
 				}
 			}
 		}
@@ -330,7 +346,8 @@
 				width: 100%;
 				padding: $button-padding;
 				border-radius: $border-radius;
-				border: 1px solid lighten($text-color, 50%);
+				border: 1px solid
+					color.adjust($text-color, $lightness: 50%, $space: hsl);
 				font-size: 1rem;
 				&:focus {
 					outline: none;
@@ -347,9 +364,10 @@
 
 			input {
 				flex: 1 1 50px;
-				padding: $button-padding / 1.5;
+				padding: math.div($button-padding, 1.5);
 				border-radius: $border-radius;
-				border: 1px solid lighten($text-color, 50%);
+				border: 1px solid
+					color.adjust($text-color, $lightness: 50%, $space: hsl);
 				font-size: 1rem;
 				text-align: center;
 			}
@@ -365,7 +383,11 @@
 				transition: background 0.2s;
 
 				&:hover {
-					background-color: darken($accent-color, 10%);
+					background-color: color.adjust(
+						$accent-color,
+						$lightness: -10%,
+						$space: hsl
+					);
 				}
 			}
 		}
@@ -385,14 +407,14 @@
 			height: 100%;
 			justify-content: center;
 
-			video {
+			.gif-video {
 				width: 100%;
-				cursor: pointer;
+				cursor: default;
 				border-radius: $border-radius $border-radius 0 0;
 			}
 
 			p {
-				padding: $gap / 2;
+				padding: $gap * 0.5;
 				margin: 0;
 				font-size: 0.85rem;
 				color: $primary-color;
@@ -402,8 +424,8 @@
 				margin-top: auto;
 				display: flex;
 				justify-content: center;
-				gap: $gap / 2;
-				padding: $gap / 2;
+				gap: $gap * 0.5;
+				padding: $gap * 0.5;
 				flex-wrap: wrap;
 
 				button {
@@ -420,7 +442,11 @@
 						color: $primary-color;
 
 						&:hover {
-							background: darken($copy-button-color, 10%);
+							background: color.adjust(
+								$copy-button-color,
+								$lightness: -10%,
+								$space: hsl
+							);
 						}
 					}
 
@@ -429,7 +455,11 @@
 						color: $primary-color;
 
 						&:hover {
-							background: darken($discord-button-color, 10%);
+							background: color.adjust(
+								$discord-button-color,
+								$lightness: -10%,
+								$space: hsl
+							);
 						}
 					}
 
@@ -438,7 +468,11 @@
 						color: $primary-color;
 
 						&:hover {
-							background: darken($close-button-color, 10%);
+							background: color.adjust(
+								$close-button-color,
+								$lightness: -10%,
+								$space: hsl
+							);
 						}
 					}
 				}
@@ -446,14 +480,19 @@
 		}
 	}
 
-	// ----------------------
-	// Utility
-	// ----------------------
 	button:focus {
 		outline: none;
 	}
 
 	input:focus {
 		outline: none;
+	}
+
+	input {
+		&.error,
+		&.error:focus {
+			border: 2px solid $close-button-color !important;
+			box-shadow: 0 0 0 4px rgba($close-button-color, 0.08);
+		}
 	}
 </style>
