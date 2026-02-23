@@ -154,6 +154,8 @@
 	});
 </script>
 
+<title>GIF Library - rbrry.fyi</title>
+
 <Topbar />
 
 <div id="controls">
