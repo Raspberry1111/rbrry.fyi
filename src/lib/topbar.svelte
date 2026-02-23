@@ -5,7 +5,7 @@
 	let { onHiddenClicked = () => {} } = $props();
 </script>
 
-<div class="topbar">
+<nav class="topbar">
 	<a
 		href={resolve("/")}
 		aria-current={page.url.pathname === "/" ? "page" : undefined}>home</a
@@ -20,7 +20,7 @@
 		onclick={() => onHiddenClicked()}
 		class="hidden">hidden</a
 	>
-</div>
+</nav>
 
 <style lang="scss">
 	a,

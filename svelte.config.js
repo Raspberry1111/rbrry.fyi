@@ -12,6 +12,7 @@ const config = {
 				"default-src": ["'self'"],
 				"img-src": ["'self'", "https:", "data:", "blob:"],
 				"media-src": ["'self'", "https:", "data:", "blob:"],
+				"style-src": ["'self'", "'unsafe-inline'"],
 			}
 		},
 	},

@@ -202,7 +202,7 @@
 	</div>
 </div>
 
-<div id="video-container">
+<main id="video-container">
 	<Masonry
 		items={gifs}
 		idKey="id"
@@ -287,7 +287,7 @@
 			</div>
 		{/snippet}
 	</Masonry>
-</div>
+</main>
 
 <style lang="scss">
 	@use "sass:math";
